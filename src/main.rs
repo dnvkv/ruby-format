@@ -26,6 +26,9 @@ fn main() -> ExitCode {
     //   * split all eligible cops into line-based and ast-based
     //   * run linting-correcting loop
     let cli = Cli::parse();
+    let clock = monotonic_clock::Clock::new();
+    let start_time = clock.now();
+
     let config_reader = PlainReader::new();
     let targets_detector = TargetsDetector::new(config_reader).unwrap();
     let formatter = ProgressFormatter;
@@ -41,6 +44,17 @@ fn main() -> ExitCode {
 
     let targets = targets_detector.find_for_all(targets).unwrap();
     linter.lint_all(targets);
+
+    let end_time = clock.now();
+
+    if cli.display_time {
+        let elapsed = end_time - start_time;
+        println!(
+            "Finished in {}.{} seconds",
+            elapsed.as_secs(),
+            elapsed.subsec_millis()
+        );
+    }
 
     return ExitCode::SUCCESS;
 }
